@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Managers
 {
-    public class GameManager : MonoBehaviourPun
+    public class GameManager : MonoBehaviourPunCallbacks
     {
         [Header("Photon Bindings")]
         [SerializeField] private PhotonView _photonView;
@@ -20,7 +20,8 @@ namespace Managers
         [SerializeField] private GameObject loseText;
         [SerializeField] private GameObject winText;
         [SerializeField] private GameObject waitingForHostText;
-        
+        [SerializeField] private GameObject waitingForPlayersText;
+
         [Header("Button Bindings")]
         [SerializeField] private Button MasterStartButton;
         
@@ -42,43 +43,84 @@ namespace Managers
 
         private void SetWinner(Player.Player character)
         {
+            //Update only the player that is the winner (comes from check last player standing method)
             var player = character._PhotonView.Owner;
-            _photonView.RPC("UpdateWinner", RpcTarget.All, player);
+            _photonView.RPC("UpdateWinner", player);
         }
 
         public void SetLoser(Player.Player character)
         {
-            var player = character._PhotonView.Owner;
-            _photonView.RPC("UpdateLoser", RpcTarget.All, player);
+            if (!winText.activeSelf)
+            {
+                Debug.Log("Player kill! Setting loser status");
+                //When a player dies, he and only he will get the update 
+                var player = character._PhotonView.Owner;
+                _photonView.RPC("UpdateLoser", player);
 
-            playerList = FindObjectsOfType<Player.Player>().ToList();
-            
-            if (playerList.Count == 1) 
-                SetWinner(playerList[0]);
+                //We check if there is a player standing, if there is only one, the winner is set
+                CheckLastPlayerStanding();
+            }
         }
 
         [PunRPC]
-        public void UpdateLoser(Photon.Realtime.Player client)
+        public void UpdateLoser()
         {
-            if (!Equals(PhotonNetwork.LocalPlayer, client)) return;
-            
             loseText.SetActive(true);
         }
 
         [PunRPC]
-        public void UpdateWinner(Photon.Realtime.Player client)
+        public void UpdateWinner()
         {
-            if (Equals(PhotonNetwork.LocalPlayer, client)) 
-                winText.SetActive(true);
+            winText.SetActive(true);
         }
 
         private void SetStartRequirements()
         {
             if (PhotonNetwork.IsMasterClient)
-                MasterStartButton.gameObject.SetActive(true);
-
+            {
+                CheckRoomStatus();
+            }
             else
+            {
                 waitingForHostText.SetActive(true);
+            }
+        }
+
+        private void CheckRoomStatus()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+                {
+                    Debug.Log("Reached max players: " + PhotonNetwork.CurrentRoom.PlayerCount.ToString() + "/" + PhotonNetwork.CurrentRoom.MaxPlayers.ToString());
+                    MasterStartButton.gameObject.SetActive(true);
+                    waitingForPlayersText.SetActive(false);
+                }
+                else
+                {
+                    waitingForPlayersText.SetActive(true);
+                }
+            }
+        }
+
+        public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+        {
+            base.OnPlayerEnteredRoom(newPlayer);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                CheckRoomStatus();
+            }
+        }
+
+        private void CheckLastPlayerStanding()
+        {
+            playerList = FindObjectsOfType<Player.Player>().ToList();
+            Debug.Log("Checking winner");
+            if (playerList.Count == 1)
+            {
+                Debug.Log("Setting winner, we have one player left");
+                SetWinner(playerList[0]);
+            }
         }
 
         public void StartGame()
