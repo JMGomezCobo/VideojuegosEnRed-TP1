@@ -177,3 +177,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerStats: {fileID: 11400000, guid: 78620aa8fd411c844974ec46cffaa04b, type: 2}
   _photonView: {fileID: 6932174024391041124}
+  _destroyOnImpactLayer:
+    serializedVersion: 2
+    m_Bits: 0

@@ -1,18 +1,27 @@
+using System;
 using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 
 namespace Utilities
 {
-    public class LavaCollider : MonoBehaviourPun
+    [RequireComponent(typeof(PhotonView))]
+    public class DamageCollider : MonoBehaviourPun
     {
-        [SerializeField] private PhotonView pv;
-        [SerializeField] private int lavaDmg = 2;
-        [SerializeField] private float lavaDmgInterval = 1f;
+        private PhotonView _photonView;
+        
+        [Header("Settings")]
+        [SerializeField] private int _layerDamage = 2;
+        [SerializeField] private float _damageRate = 1f;
+
+        private void Start()
+        {
+            _photonView = GetComponent<PhotonView>();
+        }
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (!pv.IsMine) return;
+            if (!_photonView.IsMine) return;
 
             Player.Player playerHit = collision.GetComponent<Player.Player>();
 
@@ -24,7 +33,7 @@ namespace Utilities
 
         private void OnTriggerStay2D(Collider2D collision)
         {
-            if (!pv.IsMine) return;
+            if (!_photonView.IsMine) return;
 
             Player.Player playerHit = collision.GetComponent<Player.Player>();
             
@@ -36,7 +45,7 @@ namespace Utilities
 
         private void OnTriggerExit2D(Collider2D collision)
         {
-            if (!pv.IsMine) return;
+            if (!_photonView.IsMine) return;
 
             Player.Player playerHit = collision.GetComponent<Player.Player>();
             
@@ -50,8 +59,8 @@ namespace Utilities
         {
             while (player.IsOnLava)
             {
-                player.TakeDamage(lavaDmg);
-                yield return new WaitForSeconds(lavaDmgInterval);
+                player.TakeDamage(_layerDamage);
+                yield return new WaitForSeconds(_damageRate);
             }
             
             yield return null;

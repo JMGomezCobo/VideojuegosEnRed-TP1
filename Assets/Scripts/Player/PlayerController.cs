@@ -12,21 +12,24 @@ namespace Player
         [SerializeField] private MMFeedbacks _shootFeedbacks;
         [SerializeField] private MMFeedbacks _dashFeedbacks;
         
-        private Vector3 moveDirection;
-        private float normalShootCooldown;
-        private float dashCooldown;
-        private float dashMult = 1f;
+        private Vector3 _moveDirection;
+        private Vector3 _position;
 
-        private Vector3 position;
-        private float angle;
+        private Camera _mainCamera;
+        
+        private float _normalShootCooldown;
+        private float _dashCooldown;
+        private float _dashMultiplier = 1f;
+        private float _angle;
+
         [SerializeField] private float emitterDistance = 5f;
-
-        private float shieldLength = 1f;
-
+        
         public override void Start()
         {
             base.Start();
-            normalShootCooldown = 0f;
+            
+            _mainCamera = Camera.main;
+            _normalShootCooldown = 0f;
         }
 
         public override void Update()
@@ -36,8 +39,10 @@ namespace Player
             
             HandleMovement();
             UpdateEmitterPosition();
-            Skills();
-            UIManager.UpdateSkillUI(normalShootCooldown, dashCooldown);
+            HandleShoot();
+            HandleDash();
+            
+            UIManager.UpdateSkillUI(_normalShootCooldown, _dashCooldown);
         }
 
         private void HandleMovement()
@@ -45,38 +50,38 @@ namespace Player
             float horizontalInput = Input.GetAxis("Horizontal");
             float verticalInput   = Input.GetAxis("Vertical");
             
-            moveDirection = new Vector3(horizontalInput, verticalInput, 0);
-            transform.position += moveDirection * (Time.deltaTime * PlayerStats.Speed * dashMult);
+            _moveDirection = new Vector3(horizontalInput, verticalInput, 0);
+            transform.position += _moveDirection * (Time.deltaTime * PlayerStats.Speed * _dashMultiplier);
             
             SetAnimation(horizontalInput,verticalInput);
         }
 
         private void UpdateEmitterPosition()
         {
-            position = Input.mousePosition;
-            position.z = (transform.position.z - Camera.main.transform.position.z);
-            position = Camera.main.ScreenToWorldPoint(position);
-            position = position - transform.position;
-            angle = Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg;
-            if (angle < 0.0f) angle += 360.0f;
-            Emitter.transform.localEulerAngles = new Vector3(0, 0, angle);
-            float xPos = Mathf.Cos(Mathf.Deg2Rad * angle) * emitterDistance;
-            float yPos = Mathf.Sin(Mathf.Deg2Rad * angle) * emitterDistance;
-            Emitter.transform.position = new Vector3(transform.position.x + xPos, transform.position.y + yPos, 0);
+            _position = Input.mousePosition;
+            _position.z = (transform.position.z - _mainCamera.transform.position.z);
+            _position = _mainCamera.ScreenToWorldPoint(_position);
+            
+            _position -= transform.position;
+            
+            _angle = Mathf.Atan2(_position.y, _position.x) * Mathf.Rad2Deg;
+            
+            if (_angle < 0.0f) _angle += 360.0f;
+            
+            Emitter.transform.localEulerAngles = new Vector3(0, 0, _angle);
+            
+            float positionX = Mathf.Cos(Mathf.Deg2Rad * _angle) * emitterDistance;
+            float positionY = Mathf.Sin(Mathf.Deg2Rad * _angle) * emitterDistance;
+            
+            Emitter.transform.position = new Vector3(transform.position.x + positionX, transform.position.y + positionY, 0);
 
-            Vector3 mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Emitter.transform.LookAt(new Vector3(0, 0, mousepos.z));
+            Vector3 mousePosition = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            Emitter.transform.LookAt(new Vector3(0, 0, mousePosition.z));
         }
-
-        private void Skills()
+        
+        private void HandleShoot()
         {
-            NormalProjectile();
-            HandleDashSkill();
-        }
-
-        private void NormalProjectile()
-        {
-            if (normalShootCooldown < 0)
+            if (_normalShootCooldown < 0)
             {
                 UIManager.IsSkillOnCD("Projectile", false);
 
@@ -90,45 +95,39 @@ namespace Player
                     Rigidbody2D projectileRb = shotProjectile.GetComponent<Rigidbody2D>();
 
                     projectileRb.velocity = new Vector2(shootDirection.x, shootDirection.y).normalized * PlayerStats.ProjectileSpeed;
-                    normalShootCooldown = PlayerStats.AttackSpeed;
+                    _normalShootCooldown = PlayerStats.AttackSpeed;
 
                     StartCoroutine(DestroyObject(5f, shotProjectile));
                     UIManager.IsSkillOnCD("Projectile", true);
                 }
             }
             
-            normalShootCooldown -= Time.deltaTime;
+            _normalShootCooldown -= Time.deltaTime;
         }
 
-        private void HandleDashSkill()
+        private void HandleDash()
         {
-            if(dashCooldown <= 0)
+            if(_dashCooldown <= 0)
             {
                 UIManager.IsSkillOnCD("Dash", false);
-
-
-                //Vector3 blinkTo = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
+                
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
-                    dashMult = PlayerStats.DashSpeed;
+                    _dashMultiplier = PlayerStats.DashSpeed;
                     StartCoroutine(RevertDash());
                     _dashFeedbacks.PlayFeedbacks();
 
-                    //    GameObject blink = PhotonNetwork.Instantiate("BlinkEffect", currentPosition, Quaternion.identity);
-                    //    StartCoroutine(DestroyObject(1.5f, blink));
-
-                    dashCooldown = PlayerStats.DashSpeed;
+                    _dashCooldown = PlayerStats.DashSpeed;
                     UIManager.IsSkillOnCD("Dash", true);
                 }
             }
-            dashCooldown -= Time.deltaTime;
+            _dashCooldown -= Time.deltaTime;
         }
 
-        IEnumerator RevertDash()
+        private IEnumerator RevertDash()
         {
             yield return new WaitForSeconds(1f);
-            dashMult = 1f;
+            _dashMultiplier = 1f;
         }
 
         private void SetAnimation(float x, float y)
@@ -148,7 +147,7 @@ namespace Player
             var shootDirection = Input.mousePosition;
             
             shootDirection.z = 0.0f;
-            shootDirection = Camera.main.ScreenToWorldPoint(shootDirection);
+            shootDirection = _mainCamera.ScreenToWorldPoint(shootDirection);
             shootDirection -= transform.position;
             
             return shootDirection;
@@ -158,20 +157,10 @@ namespace Player
         {
             yield return new WaitForSeconds(secondsToDestroy);
             
-            if(projectile != null)
+            if (projectile != null)
             {
                 PhotonNetwork.Destroy(projectile);
             }
-        }
-
-        private IEnumerator SetShield()
-        {
-            PV.RPC("SetShield", RpcTarget.All, true);
-            GameObject shield = PhotonNetwork.Instantiate("Shield", transform.position, Quaternion.identity);
-            shield.GetComponent<Shield>().Player = gameObject;
-            yield return new WaitForSeconds(shieldLength);
-            PV.RPC("SetShield", RpcTarget.All, false);
-            StartCoroutine(DestroyObject(0f, shield));
         }
     }
 }

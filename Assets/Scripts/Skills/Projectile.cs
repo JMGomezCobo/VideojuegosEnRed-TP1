@@ -8,6 +8,8 @@ namespace Skills
     {
         [SerializeField] private PlayerStats playerStats;
         [SerializeField] private PhotonView _photonView;
+
+        [SerializeField] private LayerMask _destroyOnImpactLayer;
         
         private Rigidbody2D _rigidbody2D;
     
@@ -21,21 +23,20 @@ namespace Skills
             if (!_photonView.IsMine) return;
 
             Player.Player playerHit = collision.GetComponent<Player.Player>();
-        
-            if (playerHit == null) return;
-            Vector2 direction = (transform.position - collision.transform.position).normalized;
-        
-            if (!playerHit.IsShield)
+
+            if (playerHit != null)
             {
+                Vector2 direction = (transform.position - collision.transform.position).normalized;
+        
                 playerHit.ApplyKnockBack(direction);
                 playerHit.TakeDamage(playerStats.Damage);
             
                 PhotonNetwork.Destroy(gameObject);
             }
-        
-            else
+
+            else if(collision.gameObject.layer == LayerMask.NameToLayer("Obstacles"))
             {
-                _rigidbody2D.velocity *= -1f;
+                PhotonNetwork.Destroy(gameObject);
             }
         }
     }

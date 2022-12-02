@@ -21,7 +21,7 @@ namespace Player
         private int CurrentHealth { get; set; }
 
         protected Animator Animator { get => animator; set => animator = value; }
-        public PhotonView PV { get => _photonView; set => _photonView = value; }
+        public PhotonView _PhotonView { get => _photonView; set => _photonView = value; }
         private TextMeshPro Tmp { get => healthText; set => healthText = value; }
         public bool IsOnLava { get; set; } = false;
         protected GameManager GameManager { get; set; }
@@ -35,8 +35,6 @@ namespace Player
         [SerializeField] private TextMeshPro healthText;
         [SerializeField] private TextMeshPro _playerName;
         
-
-
         public virtual void Start()
         {
             playerStats.Execute();

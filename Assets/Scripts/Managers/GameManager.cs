@@ -42,13 +42,13 @@ namespace Managers
 
         private void SetWinner(Player.Player character)
         {
-            var player = character.PV.Owner;
+            var player = character._PhotonView.Owner;
             _photonView.RPC("UpdateWinner", RpcTarget.All, player);
         }
 
         public void SetLoser(Player.Player character)
         {
-            var player = character.PV.Owner;
+            var player = character._PhotonView.Owner;
             _photonView.RPC("UpdateLoser", RpcTarget.All, player);
 
             playerList = FindObjectsOfType<Player.Player>().ToList();
