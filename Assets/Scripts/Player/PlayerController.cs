@@ -11,13 +11,11 @@ namespace Player
         [Header("Player Feedbacks")]
         [SerializeField] private MMFeedbacks _shootFeedbacks;
         [SerializeField] private MMFeedbacks _dashFeedbacks;
-        [SerializeField] private MMFeedbacks _shieldFeedbacks;
         
         private Vector3 moveDirection;
         private float normalShootCooldown;
-        private float shotgunProjectileCD;
         private float dashCooldown;
-        private float shieldCooldown;
+        private float dashMult = 1f;
 
         private Vector3 position;
         private float angle;
@@ -39,7 +37,7 @@ namespace Player
             HandleMovement();
             UpdateEmitterPosition();
             Skills();
-            UIManager.UpdateSkillUI(normalShootCooldown, shotgunProjectileCD, dashCooldown, shieldCooldown);
+            UIManager.UpdateSkillUI(normalShootCooldown, dashCooldown);
         }
 
         private void HandleMovement()
@@ -48,7 +46,7 @@ namespace Player
             float verticalInput   = Input.GetAxis("Vertical");
             
             moveDirection = new Vector3(horizontalInput, verticalInput, 0);
-            transform.position += moveDirection * (Time.deltaTime * PlayerStats.Speed);
+            transform.position += moveDirection * (Time.deltaTime * PlayerStats.Speed * dashMult);
             
             SetAnimation(horizontalInput,verticalInput);
         }
@@ -73,9 +71,7 @@ namespace Player
         private void Skills()
         {
             NormalProjectile();
-            ShotgunProjectile();
             HandleDashSkill();
-            HandleShieldSkill();
         }
 
         private void NormalProjectile()
@@ -104,96 +100,35 @@ namespace Player
             normalShootCooldown -= Time.deltaTime;
         }
 
-        private void ShotgunProjectile()
-        {
-            if (shotgunProjectileCD < 0f)
-            {
-                UIManager.IsSkillOnCD("Shotgun", false);
-
-                if (Input.GetKey(KeyCode.Mouse1))
-                {
-                    Vector3 shootDirection = GetShootDirection();
-                    float spreadAngle = 0;
-
-                    for (int i = 0; i <= 2; i++)
-                    {
-                        GameObject shotProjectile = PhotonNetwork.Instantiate("PlayerProjectile", Emitter.position, Quaternion.identity);
-                        Rigidbody2D projectileRb = shotProjectile.GetComponent<Rigidbody2D>();
-
-                        switch (i)
-                        {
-                            case 0:
-                                spreadAngle = 15f;
-                                break;
-                            case 1:
-                                spreadAngle = 0f;
-                                break;
-                            case 2:
-                                spreadAngle = -15f;
-                                break;
-                        }
-
-                        float rotateAngle = spreadAngle + (Mathf.Atan2(shootDirection.y, shootDirection.x) * Mathf.Rad2Deg);
-                        Vector2 MovementDirection = new Vector2(Mathf.Cos(rotateAngle * Mathf.Deg2Rad), Mathf.Sin(rotateAngle * Mathf.Deg2Rad)).normalized;
-                        projectileRb.velocity = MovementDirection * (PlayerStats.ProjectileSpeed * 2f);
-
-                        StartCoroutine(DestroyObject(0.3f, shotProjectile));
-                    }
-                    UIManager.IsSkillOnCD("Shotgun", true);
-                    shotgunProjectileCD = PlayerStats.ShotgunAttackSpeed;
-                }
-            }
-            shotgunProjectileCD -= Time.deltaTime;
-        }
-
         private void HandleDashSkill()
         {
             if(dashCooldown <= 0)
             {
-                UIManager.IsSkillOnCD("Blink", false);
+                UIManager.IsSkillOnCD("Dash", false);
 
-                Vector3 blinkTo = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+                //Vector3 blinkTo = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
-                    var currentPosition = transform.position;
-                    GameObject blink = PhotonNetwork.Instantiate("BlinkEffect", currentPosition, Quaternion.identity);
-                    
+                    dashMult = PlayerStats.DashSpeed;
+                    StartCoroutine(RevertDash());
                     _dashFeedbacks.PlayFeedbacks();
-                    
-                    StartCoroutine(DestroyObject(1.5f, blink));
 
-                    currentPosition = Vector3.MoveTowards(currentPosition, blinkTo, PlayerStats.BlinkMaxDistance);
-                    currentPosition = new Vector3(currentPosition.x, currentPosition.y, 0f);
-                    transform.position = currentPosition;
+                    //    GameObject blink = PhotonNetwork.Instantiate("BlinkEffect", currentPosition, Quaternion.identity);
+                    //    StartCoroutine(DestroyObject(1.5f, blink));
 
-                    GameObject blink2 = PhotonNetwork.Instantiate("BlinkEffect", currentPosition, Quaternion.identity);
-                    StartCoroutine(DestroyObject(1.5f, blink2));
-
-                    dashCooldown = PlayerStats.BlinkSpeed;
-                    UIManager.IsSkillOnCD("Blink", true);
+                    dashCooldown = PlayerStats.DashSpeed;
+                    UIManager.IsSkillOnCD("Dash", true);
                 }
             }
             dashCooldown -= Time.deltaTime;
         }
 
-        private void HandleShieldSkill()
+        IEnumerator RevertDash()
         {
-            if(shieldCooldown <= 0f)
-            {
-                UIManager.IsSkillOnCD("Shield", false);
-
-                if (Input.GetKey(KeyCode.E))
-                {
-                    _shieldFeedbacks.PlayFeedbacks();
-                    
-                    StartCoroutine(SetShield());
-                    shieldCooldown = PlayerStats.ShieldSpeed;
-                    UIManager.IsSkillOnCD("Shield", true);
-
-                }
-            }
-            shieldCooldown -= Time.deltaTime;
+            yield return new WaitForSeconds(1f);
+            dashMult = 1f;
         }
 
         private void SetAnimation(float x, float y)

@@ -10,17 +10,13 @@ namespace Managers
         [SerializeField] private TextMeshProUGUI _roomNameText;
         [SerializeField] private TextMeshProUGUI _pingText;
         
-        [SerializeField] private GameObject projectileCD, shotgunCD, blinkCD, shieldCD;
+        [SerializeField] private GameObject projectileCD, dashCD;
 
-        private TextMeshProUGUI blinkCountdown;
+        private TextMeshProUGUI dashCountdown;
         private TextMeshProUGUI projectileCountdown;
-        private TextMeshProUGUI shieldCountdown;
-        private TextMeshProUGUI shotgunCountdown;
 
-        private bool IsBlinkOnCooldown      { get; set; }
+        private bool IsDashOnCooldown      { get; set; }
         private bool IsProjectileOnCoolDown { get; set; }
-        private bool IsShieldOnCooldown     { get; set; }
-        private bool IsShotGunOnCooldown    { get; set; }
 
         private void Start()
         {
@@ -53,10 +49,8 @@ namespace Managers
 
         private void SetSkillCooldown()
         {
-            blinkCountdown      = blinkCD.GetComponentInChildren<TextMeshProUGUI>();
+            dashCountdown      = dashCD.GetComponentInChildren<TextMeshProUGUI>();
             projectileCountdown = projectileCD.GetComponentInChildren<TextMeshProUGUI>();
-            shieldCountdown     = shieldCD.GetComponentInChildren<TextMeshProUGUI>();
-            shotgunCountdown    = shotgunCD.GetComponentInChildren<TextMeshProUGUI>();
         }
 
         public void IsSkillOnCD(string skillName, bool cdCheck)
@@ -67,21 +61,13 @@ namespace Managers
                     IsProjectileOnCoolDown = cdCheck;
                     break;
                 
-                case "Shotgun":
-                    IsShotGunOnCooldown = cdCheck;
-                    break;
-                
-                case "Blink":
-                    IsBlinkOnCooldown = cdCheck;
-                    break;
-                
-                case "Shield":
-                    IsShieldOnCooldown = cdCheck;
+                case "Dash":
+                    IsDashOnCooldown = cdCheck;
                     break;
             }
         }
 
-        public void UpdateSkillUI(float projectileCooldown, float shotgunCooldown, float blinkCooldown, float shieldCooldown)
+        public void UpdateSkillUI(float projectileCooldown, float dashCooldown)
         {
             if(IsProjectileOnCoolDown)
             {
@@ -94,37 +80,15 @@ namespace Managers
                 projectileCD.SetActive(false);
             }
             
-            if (IsShotGunOnCooldown)
+            if (IsDashOnCooldown)
             {
-                shotgunCD.SetActive(true);
-                shotgunCountdown.text = ChangeTimeDisplay(shotgunCooldown);
+                dashCD.SetActive(true);
+                dashCountdown.text = ChangeTimeDisplay(dashCooldown);
             }
             
             else
             {
-                shotgunCD.SetActive(false);
-            }
-            
-            if (IsBlinkOnCooldown)
-            {
-                blinkCD.SetActive(true);
-                blinkCountdown.text = ChangeTimeDisplay(blinkCooldown);
-            }
-            
-            else
-            {
-                blinkCD.SetActive(false);
-            }
-            
-            if (IsShieldOnCooldown)
-            {
-                shieldCD.SetActive(true);
-                shieldCountdown.text = ChangeTimeDisplay(shieldCooldown);
-            }
-            
-            else
-            {
-                shieldCD.SetActive(false);
+                dashCD.SetActive(false);
             }
         }
 

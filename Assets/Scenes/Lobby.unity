@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &26313090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,7 +168,7 @@ MonoBehaviour:
   RandomizeOrderSeed: 1
   Endless: 1
   PlayOnStart: 1
-  VolumeMultiplier: 1
+  VolumeMultiplier: 0.4
   AutoHandleApplicationPause: 1
   Persistent: 1
   AutomaticallyUnparentOnAwake: 1
