@@ -113,7 +113,7 @@ namespace Player
                 
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
-                    _dashMultiplier = PlayerStats.DashSpeed;
+                    _dashMultiplier = PlayerStats.DashMult;
                     StartCoroutine(RevertDash());
                     _dashFeedbacks.PlayFeedbacks();
 

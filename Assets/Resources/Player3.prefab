@@ -812,15 +812,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -9033810998414751648, guid: 8e54630987500d945abf4b20e164b54e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1, y: 1.3846154}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!58 &7797028326976305819
@@ -836,9 +836,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: -0.24}
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.38
 --- !u!50 &1058451536062787271
 Rigidbody2D:
   serializedVersion: 4
@@ -937,7 +937,6 @@ MonoBehaviour:
   _playerName: {fileID: 7462442617585014497}
   _shootFeedbacks: {fileID: 1097727147040290629}
   _dashFeedbacks: {fileID: 1466525686786599455}
-  _shieldFeedbacks: {fileID: 8763229478728154880}
   emitterDistance: 0.8
 --- !u!114 &3677020636129951976
 MonoBehaviour:
