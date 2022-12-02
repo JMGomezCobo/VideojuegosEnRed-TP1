@@ -2,7 +2,6 @@ using Managers;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
-using Utilities;
 
 namespace Player
 {
@@ -100,12 +99,6 @@ namespace Player
         public void UpdatePlayerHealth()
         {
             Tmp.text = CurrentHealth.ToString();
-        }
-        
-        [PunRPC]
-        public void SetShield(bool value)
-        {
-            IsShield = value;
         }
     }
 }
