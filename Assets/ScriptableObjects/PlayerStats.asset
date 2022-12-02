@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a8e15e22bc8edf4d8b06b6dd91aab94, type: 3}
+  m_Name: PlayerStats
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  speed: 4
+  damage: 10
+  knockbackForce: 8
+  attackSpeed: 0.6
+  shotgunAttackSpeed: 4
+  blinkSpeed: 6
+  projectileSpeed: 6
+  blinkMaxDistance: 12
